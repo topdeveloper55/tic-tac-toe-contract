@@ -38,6 +38,7 @@ contract TicTacToe {
     uint256 stakes;
     uint8 current_move;
     CellState[9] board;
+    bool end;
   }
 
   address public token;
@@ -45,7 +46,7 @@ contract TicTacToe {
   room[] public rooms;
   uint256 public roomCount = 0;
 
-  uint8 current_move = 0;
+  // uint8 current_move = 0;
 
   uint256[][] winningCombinations = [
     [0, 1, 2],
@@ -57,6 +58,14 @@ contract TicTacToe {
     [0, 4, 8],
     [2, 4, 6]
   ];
+
+  function createRoom() external {
+    uint256 _stakes = IERC20(token).allowance(msg.sender, address(this));
+    require(_stakes > 0, "Please deposit token");
+    IERC20(token).transfer(address(this), _stakes);
+    rooms.push(room(msg.sender, address(0), _stakes, 0, [CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty], false));
+    roomCount += 1;
+  }
 
   function player1Address(uint256 roomId) public view returns (address) {
     return rooms[roomId].player1;
@@ -117,20 +126,20 @@ contract TicTacToe {
     require(positionIsInBounds(cellID), "Choose valid cell number");
     require(rooms[roomId].board[cellID] == CellState.Empty);
 
-    rooms[roomId].board[cellID] = currentPlayerShape();
-    current_move = current_move + 1;
+    rooms[roomId].board[cellID] = currentPlayerShape(roomId);
+    rooms[roomId].current_move += 1;
   }
 
   function currentPlayerAddress(uint256 roomId) public view returns (address) {
-    if (current_move % 2 == 0) {
+    if (rooms[roomId].current_move % 2 == 0) {
       return rooms[roomId].player2;
     } else {
       return rooms[roomId].player1;
     }
   }
 
-  function currentPlayerShape() private view returns (CellState) {
-    if (current_move % 2 == 0) {
+  function currentPlayerShape(uint256 roomId) private view returns (CellState) {
+    if (rooms[roomId].current_move % 2 == 0) {
       return CellState.X;
     } else {
       return CellState.O;
