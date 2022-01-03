@@ -9,7 +9,7 @@ module.exports = {
     // },
     localhost: {
       url: 'http://localhost:8545',
-      accounts: ['0x33149fbe1c6ecc29308df3386dfdff05e9c97194706ea913b78597b20d61da11']
+      accounts: ['0x7759ce0dc5de35225c89369435186c8509ec828f271b10541eac78a7d6ce0811']
     },
     // fantomMainnet: {
     //   url: `https://rpc.ftm.tools/`,

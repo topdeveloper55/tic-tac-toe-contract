@@ -58,6 +58,10 @@ contract TicTacToe {
     [0, 4, 8],
     [2, 4, 6]
   ];
+  
+  constructor(address _token) {
+    token = _token;
+  }
 
   function createRoom() external {
     uint256 _stakes = IERC20(token).allowance(msg.sender, address(this));
