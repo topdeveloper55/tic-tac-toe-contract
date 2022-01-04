@@ -66,9 +66,18 @@ contract TicTacToe {
   function createRoom() external {
     uint256 _stakes = IERC20(token).allowance(msg.sender, address(this));
     require(_stakes > 0, "Please deposit token");
-    IERC20(token).transfer(address(this), _stakes);
+    IERC20(token).transferFrom(msg.sender, address(this), _stakes);
     rooms.push(room(msg.sender, address(0), _stakes, 0, [CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty], false));
     roomCount += 1;
+  }
+
+  function goToRoom(uint256 roomId) external {
+    uint256 _stakes = IERC20(token).allowance(msg.sender, address(this));
+    require(_stakes == rooms[roomId].stakes, "Token amount is not enough");
+    require(msg.sender != rooms[roomId].player1, "Two addresses are equal");
+    require(rooms[roomId].player2 == address(0), "This room fulfilled");
+    IERC20(token).transferFrom(msg.sender, address(this), _stakes);
+    rooms[roomId].player2 = msg.sender;
   }
 
   function player1Address(uint256 roomId) public view returns (address) {
