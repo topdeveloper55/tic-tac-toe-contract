@@ -33,12 +33,14 @@ contract TicTacToe {
   }
 
   struct room {
+    uint256 id;
     address player1;
     address player2;
     uint256 stakes;
     uint8 current_move;
     CellState[9] board;
     bool end;
+    address winner;
   }
 
   address public token;
@@ -67,7 +69,7 @@ contract TicTacToe {
     uint256 _stakes = IERC20(token).allowance(msg.sender, address(this));
     require(_stakes > 0, "Please deposit token");
     IERC20(token).transferFrom(msg.sender, address(this), _stakes);
-    rooms.push(room(msg.sender, address(0), _stakes, 0, [CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty], false));
+    rooms.push(room(roomCount, msg.sender, address(0), _stakes, 0, [CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty, CellState.Empty], false, address(0)));
     roomCount += 1;
   }
 
@@ -102,7 +104,7 @@ contract TicTacToe {
     ) {
       IERC20(token).transfer(rooms[roomId].player1, rooms[roomId].stakes);
       IERC20(token).transfer(rooms[roomId].player2, rooms[roomId].stakes);
-    } else if(msg.sender == winner(roomId)) IERC20(token).transfer(msg.sender, rooms[roomId].stakes);
+    } else if(msg.sender == winner(roomId)) IERC20(token).transfer(msg.sender, 2 * rooms[roomId].stakes);
   }
 
   function rowToString(uint256 roomId) public view returns (string memory) {
@@ -171,6 +173,11 @@ contract TicTacToe {
 
   function isGameOver(uint256 roomId) public view returns (bool) {
     return (checkWinner(roomId) != CellState.Empty || rooms[roomId].current_move > 8);
+  }
+
+  function endRoom(uint256 roomId) public {
+    rooms[roomId].end = true;
+    rooms[roomId].winner = winner(roomId);
   }
 
   function checkWinner(uint256 roomId) private view returns (CellState) {
